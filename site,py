@@ -1,0 +1,62 @@
+import flet as ft
+
+def main(pagina):
+
+    titulo = ft.Text('ZapZap')
+    chat = ft.Column()
+
+    def entrar_chat(evento):
+        pagina.remove(titulo)
+        pagina.remove(botao_iniciar)
+        janela.open = False
+        pagina.add(chat)
+        pagina.add(linha_msg)
+        msg = f'{campo_nome_usuario.value} entrou no chat'
+        pagina.pubsub.send_all(msg)
+        pagina.update()
+
+    titulo_janela = ft.Text('Bem Vindo ao HashZap')
+    campo_nome_usuario = ft.TextField(label='Escreva seu nome no chat')
+    botao_entrar = ft.ElevatedButton('Entrar no chat', on_click=entrar_chat)
+    janela = ft.AlertDialog(
+        title= titulo_janela,
+        content= campo_nome_usuario,
+        actions= [botao_entrar])
+
+    def enviar_msg_tunel(msg):
+        texto_chat = ft.Text(msg)
+        chat.controls.append(texto_chat)
+        pagina.update()
+
+    pagina.pubsub.subscribe(enviar_msg_tunel)
+
+    def enviar_msg(evento):
+        texto_msg = campo_msg.value
+        nome_usuario = campo_nome_usuario.value
+        mensagem = f'{nome_usuario}: {texto_msg}'
+        pagina.pubsub.send_all(mensagem)
+        texto_chat = ft.Text(mensagem)
+        campo_msg.value = ''
+        pagina.update()
+
+
+    campo_msg = ft.TextField(label='Digite sua mensagem')
+    botao_enviar_msg = ft.ElevatedButton('Iniciar', on_click=enviar_msg)
+
+
+
+    linha_msg = ft.Row([campo_msg, botao_enviar_msg ])
+
+
+    def iniciar_chat(evento):
+        pagina.dialog = janela
+        janela.open = True
+        pagina.update()
+
+    botao_iniciar = ft.ElevatedButton('Iniciar Chat', on_click=iniciar_chat)
+
+    pagina.add(titulo)
+    pagina.add(botao_iniciar)
+
+ft.app(main, view=ft.WEB_BROWSER)
+
